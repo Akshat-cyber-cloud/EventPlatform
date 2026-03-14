@@ -17,7 +17,6 @@
     "express": "^5.2.1",
     "imagekit": "^6.0.0",
     "multer": "^2.1.1",
-    "razorpay": "^2.9.6",
-    "serverless-event-platform": "file:.."
+    "razorpay": "^2.9.6"
   }
 }
