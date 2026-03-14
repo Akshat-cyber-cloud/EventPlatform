@@ -4,10 +4,10 @@
   width: 100vw;
   height: 100vh;
   position: relative;
-  /* overflow: hidden; */ /* Removing to let Locomotive handle it */
-  background-color: #000;
+  background-color: var(--bg-color);
   display: flex;
   flex-direction: column;
+  transition: background-color 0.8s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 /* Tactile Grain Overlay */
@@ -68,8 +68,8 @@
   font-weight: 900;
   font-size: 1.2rem;
   letter-spacing: 6px;
-  color: white;
-  mix-blend-mode: overlay;
+  color: var(--text-primary);
+  mix-blend-mode: difference;
 }
 
 .nav-connect-btn {
@@ -77,18 +77,18 @@
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 2px;
-  color: white;
+  color: var(--text-primary);
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
   text-transform: uppercase;
   transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
   cursor: pointer;
 }
 
 .nav-connect-btn:hover {
-  background: white;
-  color: black;
-  border-color: white;
+  background: var(--text-primary);
+  color: var(--bg-color);
+  border-color: var(--text-primary);
 }
 
 /* Hero Section: High-Contrast Minimalist (Reference Match) */
@@ -106,7 +106,7 @@
   font-size: 0.9rem;
   font-weight: 500;
   letter-spacing: 0.4em;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-secondary);
   margin-bottom: 2rem;
   text-transform: uppercase;
 }
@@ -117,17 +117,16 @@
   font-weight: 900;
   line-height: 0.8;
   letter-spacing: -0.05em;
-  color: #fff;
+  color: var(--text-primary);
   margin-bottom: 2rem;
   text-transform: uppercase;
-  -webkit-text-stroke: 0; /* Remove hollow effect */
 }
 
 .hero-label-bottom {
   font-size: 1.2rem;
   font-weight: 500;
   letter-spacing: 0.2em;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
   margin-bottom: 4rem;
   text-transform: uppercase;
 }
@@ -152,25 +151,25 @@
 }
 
 .btn-primary {
-  background: #fff;
-  color: #000;
-  border: 1px solid #fff;
+  background: var(--text-primary);
+  color: var(--bg-color);
+  border: 1px solid var(--text-primary);
 }
 
 .btn-primary:hover {
   background: transparent;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .btn-secondary {
   background: transparent;
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: #fff;
+  background: var(--glass-bg);
+  border-color: var(--text-primary);
 }
 
 .magnetic-wrap {
@@ -195,7 +194,7 @@
   font-weight: 900;
   letter-spacing: 6px;
   text-transform: uppercase;
-  color: white;
+  color: var(--text-secondary);
 }
 
 .scroll-line {

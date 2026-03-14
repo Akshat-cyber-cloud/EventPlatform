@@ -4,6 +4,7 @@ import { collection, orderBy, query, onSnapshot } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../contexts/AuthContext";
 import { registerForEvent, getUserRegisteredEventIds } from "../../services/registrationService";
+import emailjs from '@emailjs/browser';
 import "../Dashboard.css";
 
 export default function EventsView() {
@@ -11,7 +12,7 @@ export default function EventsView() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [registeredEvents, setRegisteredEvents] = useState(new Set());
-  
+
   // Modal State
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [participationType, setParticipationType] = useState('Individual');
@@ -22,7 +23,7 @@ export default function EventsView() {
 
   useEffect(() => {
     const q = query(collection(db, "events"), orderBy("createdAt", "desc"));
-    
+
     // Use onSnapshot for real-time seat tracking on the user side too!
     const unsubscribeEvents = onSnapshot(q, (snapshot) => {
       setEvents(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -40,7 +41,7 @@ export default function EventsView() {
     };
 
     fetchRegistrations();
-    
+
     return () => unsubscribeEvents();
   }, [currentUser]);
 
@@ -58,7 +59,7 @@ export default function EventsView() {
 
   const handlePaymentAndRegister = async () => {
     if (!currentUser || !selectedEvent) return;
-    
+
     // Validation
     if (participationType === 'Team') {
       if (!teamName.trim()) {
@@ -77,7 +78,7 @@ export default function EventsView() {
     }
 
     setRegistering(true);
-    
+
     try {
       // 1. Load Razorpay Script
       const loadScript = (src) => {
@@ -142,10 +143,37 @@ export default function EventsView() {
           };
 
           const success = await registerForEvent(currentUser.uid, selectedEvent.id, registrationData);
-          
+
           if (success) {
             setRegisteredEvents(prev => new Set(prev).add(selectedEvent.id));
-            alert("Successfully registered! Your ticket has been generated.");
+
+            // --- EMAILJS INTEGRATION ---
+            try {
+              const emailParams = {
+                user_name: currentUser.displayName || currentUser.email.split('@')[0] || "Attendee",
+                email: currentUser.email,
+                event_name: selectedEvent.title,
+                event_date: selectedEvent.date || 'TBD',
+                event_location: selectedEvent.location || 'TBA',
+                ticket_id: response.razorpay_payment_id || `TKT-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+                qr_code: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`Attendee: ${currentUser.displayName || "Attendee"}, Ticket: ${response.razorpay_payment_id}`)}`,
+                to_name: currentUser.displayName || "Attendee",
+                to_email: currentUser.email
+              };
+
+              await emailjs.send(
+                import.meta.env.VITE_EMAILJS_SERVICE_ID,
+                import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+                emailParams,
+                import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+              );
+              console.log("Confirmation email sent successfully!");
+            } catch (emailError) {
+              console.error("Failed to send confirmation email:", emailError);
+            }
+            // ---------------------------
+
+            alert("Successfully registered! Your ticket has been generated and emailed to you.");
             handleCloseModal();
           } else {
             alert("Payment successful but database update failed. Please contact support.");
@@ -154,13 +182,14 @@ export default function EventsView() {
         },
         prefill: {
           email: currentUser.email,
-          name: teamMembers[0]?.name || currentUser.displayName || ""
+          name: teamMembers[0]?.name || currentUser.displayName || "",
+          contact: teamMembers[0]?.phone || ""
         },
         theme: {
-          color: "#ff0000"
+          color: "#7000ff"
         },
         modal: {
-          ondismiss: function() {
+          ondismiss: function () {
             setRegistering(false);
           }
         }
@@ -223,7 +252,7 @@ export default function EventsView() {
                   <span style={{ opacity: 0.8, fontSize: '0.9rem' }}>📍 {event.location || 'TBA'}</span>
                   <span className="price-tag">{event.price > 0 ? `₹${event.price}` : 'FREE'}</span>
                 </div>
-                
+
                 {event.maxSeats && (
                   <div className="progress-bar-container">
                     <div className="progress-bar-fill" style={{ width: `${(event.availableSeats / event.maxSeats) * 100}%` }}></div>
@@ -238,13 +267,13 @@ export default function EventsView() {
               </div>
 
               <div className="event-footer">
-                <button 
+                <button
                   className="btn btn-primary btn-full shadow-lg"
                   disabled={registeredEvents.has(event.id) || event.availableSeats === 0}
                   onClick={() => handleOpenModal(event)}
                 >
-                  {registeredEvents.has(event.id) 
-                    ? "✓ REGISTERED" 
+                  {registeredEvents.has(event.id)
+                    ? "✓ REGISTERED"
                     : (event.availableSeats === 0 ? "CLUSTER FULL" : "INITIALIZE REGISTRATION")}
                 </button>
               </div>
@@ -256,7 +285,7 @@ export default function EventsView() {
       {/* RSVP Checkout Modal */}
       <AnimatePresence>
         {selectedEvent && (
-          <motion.div 
+          <motion.div
             className="modal-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -273,8 +302,8 @@ export default function EventsView() {
               padding: '1rem'
             }}
           >
-              <style>
-                {`
+            <style>
+              {`
                   .hide-scrollbar::-webkit-scrollbar {
                     display: none;
                   }
@@ -283,8 +312,8 @@ export default function EventsView() {
                     scrollbar-width: none;  /* Firefox */
                   }
                 `}
-              </style>
-             <motion.div 
+            </style>
+            <motion.div
               className="modal-content admin-create-form hide-scrollbar"
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
@@ -301,21 +330,21 @@ export default function EventsView() {
                 <img src={selectedEvent.image} alt={selectedEvent.title} className="event-card-banner" style={{ margin: '-3rem -3rem 2rem -3rem', width: 'calc(100% + 6rem)' }} />
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h3 style={{ margin: 0 }}>Register: {selectedEvent.title}</h3>
-                <button onClick={handleCloseModal} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+                <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>Register: {selectedEvent.title}</h3>
+                <button onClick={handleCloseModal} style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
               </div>
 
               <div className="form-group">
-                <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', marginBottom: '0.5rem', display: 'block' }}>Participation Type</label>
+                <label style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.5rem', display: 'block' }}>Participation Type</label>
                 {selectedEvent.maxTeamSize > 1 ? (
-                  <select 
-                    value={participationType} 
+                  <select
+                    value={participationType}
                     onChange={e => {
                       setParticipationType(e.target.value);
                       const defaultSize = e.target.value === 'Team' ? 2 : 1;
                       setTeamSize(defaultSize);
                       setTeamMembers(Array(defaultSize).fill().map(() => ({ name: '', email: '', phone: '' })));
-                    }} 
+                    }}
                     className="admin-input"
                   >
                     <option value="Individual">Individual</option>
@@ -328,29 +357,29 @@ export default function EventsView() {
 
               {participationType === 'Team' && (
                 <>
-                  <div className="form-group-row">
+                  <div className="form-group-row" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                     <div className="form-group" style={{ flex: 2 }}>
-                      <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', marginBottom: '0.5rem', display: 'block' }}>Team Name *</label>
-                      <input 
-                        type="text" 
-                        value={teamName} 
-                        onChange={e => setTeamName(e.target.value)} 
-                        placeholder="Enter your team name" 
-                        className="admin-input" 
+                      <label style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.5rem', display: 'block' }}>Team Name *</label>
+                      <input
+                        type="text"
+                        value={teamName}
+                        onChange={e => setTeamName(e.target.value)}
+                        placeholder="Enter your team name"
+                        className="admin-input"
                       />
                     </div>
                     <div className="form-group" style={{ flex: 1 }}>
-                      <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', marginBottom: '0.5rem', display: 'block' }}>Team Size</label>
-                      <select 
-                        value={teamSize} 
+                      <label style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.5rem', display: 'block' }}>Team Size</label>
+                      <select
+                        value={teamSize}
                         onChange={e => {
                           const size = Number(e.target.value);
                           setTeamSize(size);
                           const newMembers = [...teamMembers];
                           if (size > newMembers.length) {
-                             newMembers.push(...Array(size - newMembers.length).fill().map(() => ({ name: '', email: '', phone: '' })));
+                            newMembers.push(...Array(size - newMembers.length).fill().map(() => ({ name: '', email: '', phone: '' })));
                           } else {
-                             newMembers.length = size;
+                            newMembers.length = size;
                           }
                           setTeamMembers(newMembers);
                         }}
@@ -366,76 +395,76 @@ export default function EventsView() {
               )}
 
               <div className="form-group" style={{ marginTop: '1.5rem' }}>
-                <h4 style={{ color: '#fff', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>
+                <h4 style={{ color: 'var(--text-primary)', marginBottom: '1rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem' }}>
                   {participationType === 'Team' ? 'Team Members Details *' : 'Your Details *'}
                 </h4>
                 {teamMembers.map((member, index) => (
-                  <div key={index} style={{ marginBottom: '1.5rem', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div key={index} style={{ marginBottom: '1.5rem', background: 'var(--input-bg)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
                     <label style={{ color: '#85C79A', fontSize: '0.85rem', marginBottom: '0.8rem', display: 'block', fontWeight: 'bold' }}>
                       {participationType === 'Team' ? `Member ${index + 1}` : 'Participant Details'}
                     </label>
-                    <input 
-                      type="text" 
-                      value={member.name} 
+                    <input
+                      type="text"
+                      value={member.name}
                       onChange={e => {
                         const newMembers = [...teamMembers];
                         newMembers[index].name = e.target.value;
                         setTeamMembers(newMembers);
-                      }} 
-                      placeholder="Full Name" 
-                      className="admin-input" 
+                      }}
+                      placeholder="Full Name"
+                      className="admin-input"
                       style={{ marginBottom: '0.8rem' }}
                     />
-                    <input 
-                      type="email" 
-                      value={member.email} 
+                    <input
+                      type="email"
+                      value={member.email}
                       onChange={e => {
                         const newMembers = [...teamMembers];
                         newMembers[index].email = e.target.value;
                         setTeamMembers(newMembers);
-                      }} 
-                      placeholder="Gmail Address" 
-                      className="admin-input" 
+                      }}
+                      placeholder="Gmail Address"
+                      className="admin-input"
                       style={{ marginBottom: '0.8rem' }}
                     />
-                    <input 
-                      type="tel" 
-                      value={member.phone} 
+                    <input
+                      type="tel"
+                      value={member.phone}
                       onChange={e => {
                         const newMembers = [...teamMembers];
                         newMembers[index].phone = e.target.value;
                         setTeamMembers(newMembers);
-                      }} 
-                      placeholder="Phone Number" 
-                      className="admin-input" 
+                      }}
+                      placeholder="Phone Number"
+                      className="admin-input"
                     />
                   </div>
                 ))}
               </div>
 
-              <div style={{ 
-                background: 'rgba(0,0,0,0.3)', 
-                padding: '1.5rem', 
-                borderRadius: '12px', 
+              <div style={{
+                background: 'var(--input-bg)',
+                padding: '1.5rem',
+                borderRadius: '12px',
                 marginTop: '2rem',
                 marginBottom: '1.5rem',
-                border: '1px solid rgba(78, 141, 156, 0.3)'
+                border: '1px solid var(--glass-border)'
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
                   <span>Ticket Price:</span>
                   <span>{selectedEvent.price > 0 ? `₹${selectedEvent.price}` : 'Free'} {participationType === 'Team' && `x ${teamSize}`}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                   <span>Platform Fee:</span>
                   <span>₹0</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', fontWeight: 'bold', fontSize: '1.2rem', color: '#EDF7BD' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--glass-border)', fontWeight: 'bold', fontSize: '1.2rem', color: 'var(--primary-accent)' }}>
                   <span>Total Amount:</span>
                   <span>{selectedEvent.price > 0 ? `₹${participationType === 'Team' ? selectedEvent.price * teamSize : selectedEvent.price}` : 'Free'}</span>
                 </div>
               </div>
 
-              <button 
+              <button
                 className="btn btn-primary btn-full"
                 onClick={handlePaymentAndRegister}
                 disabled={registering}

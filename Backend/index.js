@@ -65,7 +65,7 @@ app.post('/api/create-order', async (req, res) => {
     try {
         const { amount, currency = 'INR', receipt = 'receipt_123' } = req.body;
         console.log("Creating Razorpay Order:", { amount, currency, receipt });
-        
+
         if (amount === undefined || amount === null) {
             return res.status(400).json({ error: "Amount is required" });
         }
@@ -88,7 +88,7 @@ app.post('/api/create-order', async (req, res) => {
         res.json(order);
     } catch (error) {
         console.error("Razorpay Order Error:", error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: error.message || "Failed to create order",
             details: error
         });
@@ -98,9 +98,9 @@ app.post('/api/create-order', async (req, res) => {
 // Global Error Handler to ensure JSON responses
 app.use((err, req, res, next) => {
     console.error("Global Server Error:", err);
-    res.status(500).json({ 
-        error: "Internal Server Error", 
-        message: err.message 
+    res.status(500).json({
+        error: "Internal Server Error",
+        message: err.message
     });
 });
 

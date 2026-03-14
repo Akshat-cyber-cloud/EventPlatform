@@ -7,6 +7,7 @@ import {
   updateProfile
 } from "firebase/auth";
 import { auth } from "../firebase";
+import { useTheme } from "./ThemeContext";
 
 const AuthContext = createContext();
 
@@ -17,6 +18,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { setTheme } = useTheme();
 
   async function signup(email, password, name) {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -29,7 +31,8 @@ export function AuthProvider({ children }) {
     return signInWithEmailAndPassword(auth, email, password);
   }
 
-  function logout() {
+  async function logout() {
+    setTheme('dark');
     return signOut(auth);
   }
 

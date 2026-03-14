@@ -74,7 +74,7 @@ const Auth = () => {
     <div className="auth-page" onClick={handleClose}>
       <div className="auth-background">
         <LightPillar
-          topColor="#FF0000"
+          topColor="#7000ff"
           bottomColor="#000000"
           intensity={0.6}
           rotationSpeed={0.05}
@@ -130,7 +130,7 @@ const Auth = () => {
               {loading ? 'Processing...' : 'Sign Up'}
             </button>
             <div className="mobile-only" style={{marginTop: '20px', display: 'none'}}>
-               Already have an account? <span onClick={toggleMode} style={{color: '#ff0000', cursor: 'pointer'}}>Sign In</span>
+               Already have an account? <span onClick={toggleMode} style={{color: '#00f2ff', cursor: 'pointer'}}>Sign In</span>
             </div>
           </form>
         </div>
@@ -155,33 +155,34 @@ const Auth = () => {
               onChange={(e) => setPassword(e.target.value)}
               required 
             />
-            <a href="#" className="forgot-link">Forgot your password?</a>
+            {/* <a href="#" className="forgot-link">Forgot your password?</a> */}
             {error && isLogin && <p className="auth-error">{error}</p>}
             <button className="auth-button" type="submit" disabled={loading}>
               {loading ? 'Processing...' : 'Sign In'}
             </button>
             <div className="mobile-only" style={{marginTop: '20px', display: 'none'}}>
-               New here? <span onClick={toggleMode} style={{color: '#ff0000', cursor: 'pointer'}}>Sign Up</span>
+               New here? <span onClick={toggleMode} style={{color: '#00f2ff', cursor: 'pointer'}}>Sign Up</span>
             </div>
           </form>
         </div>
 
         {/* Overlay Panels */}
         <div className="overlay-container">
+          <h1 className="auth-brand-title">EVENTIX</h1>
           <div className="overlay">
             <div className="overlay-panel overlay-left">
-              <h1 className="auth-title">Welcome Back!</h1>
+              <h1 className="auth-title">Join the Hub</h1>
               <p className="auth-subtitle">
-                To keep connected with us please login with your personal info
+                Reconnect with the community and manage your upcoming event experiences
               </p>
               <button className="auth-button ghost" onClick={toggleMode}>
                 Sign In
               </button>
             </div>
             <div className="overlay-panel overlay-right">
-              <h1 className="auth-title">Hello User!</h1>
+              <h1 className="auth-title">Join Us</h1>
               <p className="auth-subtitle">
-                Enter your personal details and start journey with us
+                Create your account and unlock exclusive access to world-class hackathons
               </p>
               <button className="auth-button ghost" onClick={toggleMode}>
                 Sign Up
@@ -191,7 +192,7 @@ const Auth = () => {
         </div>
       </div>
       
-      <Link to="/" style={{position: 'absolute', bottom: '20px', color: 'white', textDecoration: 'none', opacity: 0.6}}>
+      <Link to="/" style={{position: 'absolute', bottom: '20px', color: 'var(--text-secondary)', textDecoration: 'none', opacity: 0.6}}>
         ← Back to Home
       </Link>
     </div>

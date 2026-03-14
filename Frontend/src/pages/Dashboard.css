@@ -1,14 +1,14 @@
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
-  /* Hyper-Black Foundation */
-  background-color: #05060f;
-  background-image: 
-    radial-gradient(circle at 0% 0%, rgba(112, 0, 255, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 100% 100%, rgba(0, 242, 255, 0.05) 0%, transparent 40%);
-  color: #ffffff;
+  background-color: var(--bg-color);
+  background-image:
+    radial-gradient(circle at 0% 0%, var(--glow-color) 0%, transparent 40%),
+    radial-gradient(circle at 100% 100%, var(--glow-color) 0%, transparent 40%);
+  color: var(--text-primary);
   font-family: 'Outfit', 'Inter', sans-serif;
   letter-spacing: -0.01em;
+  transition: background-color 0.8s ease;
 }
 
 .dashboard-main {
@@ -23,8 +23,8 @@
 
 .dashboard-header-bar {
   padding: 1.5rem 3.5rem;
-  border-bottom: 2px solid rgba(112, 0, 255, 0.15);
-  background: rgba(5, 6, 15, 0.9);
+  border-bottom: 2px solid var(--glass-border);
+  background: var(--card-bg);
   backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(25px);
   position: sticky;
@@ -38,7 +38,7 @@
   margin: 0;
   letter-spacing: -2px;
   text-transform: uppercase;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .highlight {
@@ -63,7 +63,7 @@
   font-weight: 800;
   margin-top: 0;
   margin-bottom: 3rem;
-  color: #fff;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 16px;
@@ -82,15 +82,15 @@
 
 /* Solid Cyber Forms */
 .admin-create-form {
-  background: #11121d;
-  border: 1px solid rgba(0, 242, 255, 0.1);
-  border-top: 4px solid #7000ff;
+  background: var(--card-bg);
+  border: 1px solid var(--glass-border);
+  border-top: 4px solid var(--primary-accent);
   border-radius: 12px;
   padding: 3rem;
   margin-bottom: 3rem;
-  box-shadow: 
-    0 30px 60px rgba(0, 0, 0, 0.8),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.2),
+    inset 0 0 0 1px var(--glass-border);
 }
 
 .admin-create-form h3 {
@@ -106,9 +106,9 @@
 .admin-input,
 .admin-textarea {
   width: 100%;
-  background: #05060f;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  color: #fff;
+  background: var(--input-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
   padding: 1.25rem 1.5rem;
   border-radius: 8px;
   font-size: 1rem;
@@ -130,8 +130,8 @@
 }
 
 .event-card {
-  background: #11121d;
-  border: 1px solid rgba(0, 242, 255, 0.05);
+  background: var(--card-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 12px;
   padding: 2.5rem;
   display: flex;
@@ -139,7 +139,8 @@
   position: relative;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-  height: 100%; /* Fill the grid cell */
+  height: 100%;
+  /* Fill the grid cell */
 }
 
 .event-card:hover {
@@ -151,7 +152,8 @@
 .event-card-banner {
   width: calc(100% + 5rem);
   margin: -2.5rem -2.5rem 2rem -2.5rem;
-  height: 200px; /* Standardized banner height */
+  height: 200px;
+  /* Standardized banner height */
   min-height: 200px;
   object-fit: cover;
   border-bottom: 2px solid rgba(0, 242, 255, 0.1);
@@ -170,7 +172,7 @@
   font-size: 1.4rem;
   font-weight: 800;
   margin: 0;
-  color: #fff;
+  color: var(--text-primary);
   letter-spacing: -0.5px;
   line-height: 1.2;
 }
@@ -212,8 +214,8 @@
 
 .btn-secondary {
   background: transparent;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
+  border: 2px solid var(--glass-border);
+  color: var(--text-primary);
 }
 
 .btn-secondary:hover {
@@ -236,14 +238,15 @@
 }
 
 .event-meta {
-  flex-grow: 1; /* Pushes footer to the bottom */
+  flex-grow: 1;
+  /* Pushes footer to the bottom */
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
 .event-content {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
   font-size: 0.95rem;
   line-height: 1.6;
   margin-top: 1rem;
@@ -300,9 +303,17 @@
 
 /* Animations */
 @keyframes neon-pulse {
-  0% { box-shadow: 0 0 5px #00f2ff; }
-  50% { box-shadow: 0 0 20px #00f2ff; }
-  100% { box-shadow: 0 0 5px #00f2ff; }
+  0% {
+    box-shadow: 0 0 5px #00f2ff;
+  }
+
+  50% {
+    box-shadow: 0 0 20px #00f2ff;
+  }
+
+  100% {
+    box-shadow: 0 0 5px #00f2ff;
+  }
 }
 
 .neon-border-pulse:hover {
@@ -316,6 +327,14 @@
   margin-top: 1.5rem;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.shadow-sm {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-lg {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
 .progress-bar-fill {

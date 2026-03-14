@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { auth } from "../firebase";
 
-export const ADMIN_UID = "oocJCivbdkcXxec2Obme8M9BCFr2";
+export const ADMIN_UID = "pijoc1HoHnW89CSLJN1LJdpxwri2";
 
 export default function AdminRoute({ children }) {
   const user = auth.currentUser;

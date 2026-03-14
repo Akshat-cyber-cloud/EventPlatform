@@ -1,18 +1,18 @@
 .sidebar-container {
   width: 250px;
   height: 100vh;
-  /* Dark Blue with lower opacity for glassmorphism */
-  background: rgba(40, 28, 89, 0.6);
+  background: var(--card-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;
   position: sticky;
   top: 0;
   left: 0;
   z-index: 50;
-  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
+  transition: background 0.8s ease, border-color 0.8s ease;
 }
 
 .sidebar-logo {
@@ -45,20 +45,21 @@
   display: flex;
   align-items: center;
   padding: 1rem 1.25rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
   text-decoration: none;
   font-weight: 500;
   border-radius: 12px;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
   position: relative;
 }
 
 .sidebar-link:hover {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
+  background: var(--input-bg);
 }
 
 .sidebar-link.active {
-  color: #ffffff;
+  color: var(--text-primary);
 }
 
 .active-indicator {

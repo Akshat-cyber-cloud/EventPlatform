@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, useSpring, useTransform } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import LightPillar from '../components/LightPillar';
 import './Home.css';
 
@@ -39,23 +40,30 @@ const MagneticButton = ({ children, className, ...props }) => {
 
 const Home = () => {
   const { currentUser, logout } = useAuth();
+  const { theme } = useTheme();
+  const navigate = useNavigate();
+
+  const scrollToEvents = () => {
+    const el = document.getElementById('events-explore');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <div className="home-container" data-scroll-section>
       <div className="grain-overlay"></div>
       <div className="home-background">
         <LightPillar
-          topColor="#5227FF"
-          bottomColor="#FF27B3"
-          intensity={0.7}
+          topColor={theme === 'dark' ? "#5227FF" : "#E0E0FF"}
+          bottomColor={theme === 'dark' ? "#FF27B3" : "#F0F0FF"}
+          intensity={theme === 'dark' ? 0.7 : 0.3}
           rotationSpeed={0.2}
-          glowAmount={0.002}
+          glowAmount={theme === 'dark' ? 0.002 : 0}
           pillarWidth={5}
           pillarHeight={0.6}
           noiseIntensity={0.3}
           pillarRotation={10}
           interactive={false}
-          mixBlendMode="plus-lighter"
+          mixBlendMode={theme === 'dark' ? "plus-lighter" : "multiply"}
           quality="high"
         />
       </div>
@@ -106,8 +114,8 @@ const Home = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
           >
-            <MagneticButton className="btn btn-primary">START EVENT</MagneticButton>
-            <MagneticButton className="btn btn-secondary">EXPLORE</MagneticButton>
+            <MagneticButton className="btn btn-primary" onClick={() => navigate('/signin')}>START EVENT</MagneticButton>
+            <MagneticButton className="btn btn-secondary" onClick={scrollToEvents}>EXPLORE</MagneticButton>
           </motion.div>
         </main>
 

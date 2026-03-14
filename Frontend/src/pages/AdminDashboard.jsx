@@ -3,6 +3,7 @@ import { db } from "../firebase";
 import { collection, addDoc, deleteDoc, doc, serverTimestamp, orderBy, query, onSnapshot } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import ThemeToggle from "../components/ThemeToggle";
 import "./Dashboard.css";
 
 export default function AdminDashboard() {
@@ -137,9 +138,10 @@ export default function AdminDashboard() {
         transition={{ duration: 1 }}
       >
         <div className="dashboard-header-bar">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
             <h2 className="dashboard-welcome">Admin <span className="highlight">Command Center</span></h2>
-            <div className="dashboard-actions">
+            <div className="dashboard-actions" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+              <ThemeToggle />
               <Link to="/dashboard" className="btn btn-secondary shadow-sm">User Panel</Link>
               <Link to="/" className="btn btn-secondary shadow-sm">Home</Link>
             </div>
@@ -172,20 +174,20 @@ export default function AdminDashboard() {
               </div>
               <div className="form-group-row">
                 <div style={{ flex: 1 }}>
-                  <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', marginBottom: '0.4rem', display: 'block' }}>Entry Fee (INR)</label>
+                  <label style={{ color: 'var(--text-secondary)', opacity: 0.6, fontSize: '0.75rem', marginBottom: '0.4rem', display: 'block' }}>Entry Fee (INR)</label>
                   <input type="number" value={price} onChange={e => setPrice(e.target.value)} className="admin-input" min="0" />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', marginBottom: '0.4rem', display: 'block' }}>Team Size</label>
+                  <label style={{ color: 'var(--text-secondary)', opacity: 0.6, fontSize: '0.75rem', marginBottom: '0.4rem', display: 'block' }}>Team Size</label>
                   <input type="number" value={maxTeamSize} onChange={e => setMaxTeamSize(e.target.value)} className="admin-input" min="1" />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', marginBottom: '0.4rem', display: 'block' }}>Capacity</label>
+                  <label style={{ color: 'var(--text-secondary)', opacity: 0.6, fontSize: '0.75rem', marginBottom: '0.4rem', display: 'block' }}>Capacity</label>
                   <input type="number" value={maxSeats} onChange={e => setMaxSeats(e.target.value)} placeholder="Unlimited" className="admin-input" min="1" />
                 </div>
               </div>
               <div className="form-group">
-                <label style={{ color: 'rgba(255,0,0,0.5)', fontSize: '0.75rem', marginBottom: '0.5rem', display: 'block', fontWeight: 'bold' }}>EVENT BANNER</label>
+                <label style={{ color: 'var(--primary-accent)', opacity: 0.7, fontSize: '0.75rem', marginBottom: '0.5rem', display: 'block', fontWeight: 'bold' }}>EVENT BANNER</label>
                 <div className="admin-input" style={{ position: 'relative', overflow: 'hidden', padding: '0.8rem' }}>
                   <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files[0])} style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer' }} />
                   <span style={{ opacity: 0.6 }}>{imageFile ? `Selected: ${imageFile.name}` : 'Click to upload banner...'}</span>
@@ -217,7 +219,7 @@ export default function AdminDashboard() {
                 />
               </div>
               <div className="form-group">
-                <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', marginBottom: '0.4rem', display: 'block' }}>Signal Priority</label>
+                <label style={{ color: 'var(--text-secondary)', opacity: 0.6, fontSize: '0.75rem', marginBottom: '0.4rem', display: 'block' }}>Signal Priority</label>
                 <select value={type} onChange={e => setType(e.target.value)} className="admin-input">
                   <option value="Register">Alpha (Registration)</option>
                   <option value="Alert">Omega (Urgent)</option>

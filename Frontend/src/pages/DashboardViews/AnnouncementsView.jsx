@@ -37,32 +37,33 @@ export default function AnnouncementsView() {
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="view-content"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       style={{
-        background: "rgba(0,0,0,0.2)",
+        background: "var(--card-bg)",
         minHeight: "75vh",
         padding: "2rem",
-        borderRadius: "20px",
+        borderRadius: "var(--radius-main)",
+        border: "1px solid var(--glass-border)",
         fontFamily: "'Inter', sans-serif"
       }}
     >
-      <h2 style={{ color: "#fff", marginBottom: "2rem" }}>Live Announcements</h2>
+      <h2 style={{ color: "var(--text-primary)", marginBottom: "2rem" }}>Live Announcements</h2>
 
       {announcements.length === 0 ? (
         <div className="empty-state-card" style={{ marginTop: '2rem' }}>
           <div className="empty-icon">📢</div>
-          <h4>No Recent Announcements</h4>
-          <p>Stay tuned for real-time updates from event organizers.</p>
+          <h4 style={{ color: "var(--text-primary)" }}>No Recent Announcements</h4>
+          <p style={{ color: "var(--text-secondary)" }}>Stay tuned for real-time updates from event organizers.</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {announcements.map(a => (
-            <motion.div 
-              key={a.id} 
+            <motion.div
+              key={a.id}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               style={{
@@ -70,20 +71,20 @@ export default function AnnouncementsView() {
                 alignItems: "center",
                 gap: "1.5rem",
                 padding: "1rem 1.5rem",
-                borderBottom: "1px solid rgba(255,255,255,0.05)",
-                background: "rgba(255,255,255,0.02)",
+                borderBottom: "1px solid var(--glass-border)",
+                background: "var(--input-bg)",
                 borderRadius: "12px",
-                color: "rgba(255,255,255,0.85)",
+                color: "var(--text-primary)",
               }}
             >
-              <div style={{ 
-                minWidth: "80px", 
-                color: "rgba(255,255,255,0.4)", 
-                fontSize: "0.85rem" 
+              <div style={{
+                minWidth: "80px",
+                color: "var(--text-secondary)",
+                fontSize: "0.85rem"
               }}>
                 {formatTime(a.createdAt)}
               </div>
-              
+
               <div style={{
                 background: `${tagColors[a.type] || tagColors.Broadcast}20`,
                 color: tagColors[a.type] || tagColors.Broadcast,
@@ -99,7 +100,7 @@ export default function AnnouncementsView() {
                 {a.type}
               </div>
 
-              <div style={{ flex: 1, fontSize: "0.95rem" }}>
+              <div style={{ flex: 1, fontSize: "0.95rem", color: "var(--text-primary)" }}>
                 {a.message}
               </div>
             </motion.div>
