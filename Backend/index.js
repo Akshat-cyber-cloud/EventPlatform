@@ -108,9 +108,9 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Catch-all route to serve the frontend's index.html for any other requests (SPA support)
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../Frontend/dist', 'index.html'));
+// New Express 5 syntax for catch-all route (SPA support)
+app.get('/{*path}', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../Frontend/dist', 'index.html'));
 });
 
 const PORT = process.env.PORT || 5000;
