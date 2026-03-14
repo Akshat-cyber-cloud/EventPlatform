@@ -94,7 +94,7 @@ const Section2 = () => {
       }
 
       // 2. Create Order on Backend
-      const orderRes = await fetch('http://localhost:5000/api/create-order', {
+      const orderRes = await fetch('/api/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

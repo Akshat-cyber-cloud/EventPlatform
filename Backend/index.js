@@ -6,9 +6,13 @@ const Razorpay = require('razorpay');
 
 const app = express();
 require('dotenv').config();
+const path = require('path');
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from the Frontend dist directory
+app.use(express.static(path.join(__dirname, '../Frontend/dist')));
 
 // ImageKit Setup
 const imagekit = new ImageKit({
@@ -104,7 +108,12 @@ app.use((err, req, res, next) => {
     });
 });
 
+// Catch-all route to serve the frontend's index.html for any other requests (SPA support)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../Frontend/dist', 'index.html'));
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`ImageKit Backend listening at http://localhost:${PORT}`);
+    console.log(`Server listening on port ${PORT}`);
 });
