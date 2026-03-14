@@ -1,62 +1,120 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, useSpring, useTransform } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import LightPillar from '../components/LightPillar';
 import './Home.css';
+
+const MagneticButton = ({ children, className, ...props }) => {
+  const ref = useRef(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const handleMouse = (e) => {
+    const { clientX, clientY } = e;
+    const { height, width, left, top } = ref.current.getBoundingClientRect();
+    const middleX = clientX - (left + width / 2);
+    const middleY = clientY - (top + height / 2);
+    setPosition({ x: middleX * 0.3, y: middleY * 0.3 });
+  };
+
+  const reset = () => setPosition({ x: 0, y: 0 });
+
+  const { x, y } = position;
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouse}
+      onMouseLeave={reset}
+      animate={{ x, y }}
+      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+      className="magnetic-wrap"
+    >
+      <button className={className} {...props}>
+        {children}
+      </button>
+    </motion.div>
+  );
+};
+
 const Home = () => {
   const { currentUser, logout } = useAuth();
+
   return (
-    <div className="home-container">
+    <div className="home-container" data-scroll-section>
+      <div className="grain-overlay"></div>
       <div className="home-background">
         <LightPillar
           topColor="#5227FF"
-          bottomColor="#FF9FFC"
-          intensity={1}
-          rotationSpeed={0.3}
+          bottomColor="#FF27B3"
+          intensity={0.7}
+          rotationSpeed={0.2}
           glowAmount={0.002}
-          pillarWidth={3}
-          pillarHeight={0.4}
-          noiseIntensity={0.5}
-          pillarRotation={25}
+          pillarWidth={5}
+          pillarHeight={0.6}
+          noiseIntensity={0.3}
+          pillarRotation={10}
           interactive={false}
-          mixBlendMode="screen"
+          mixBlendMode="plus-lighter"
           quality="high"
         />
       </div>
 
       <div className="home-content">
         <nav className="navbar">
-          <div className="nav-logo">
-            {/* <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3"></circle>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-            </svg> */}
-            HHHH
-          </div>
-          <div className="nav-links">
-            <h4><a href="#" className="nav-link">HOME</a></h4>
-            <h4><a href="#" className="nav-link">ABOUT</a></h4>
-            <h4><a href="#" className="nav-link">SERVICES</a></h4>
-            <h4><a href="#" className="nav-link">PROJECTS</a></h4>
-          </div>
+          <div className="nav-logo">EVENTIX</div>
           <div className="nav-right">
             {currentUser ? (
               <button className="nav-connect-btn" onClick={logout}>Sign Out</button>
             ) : (
-              <Link to="/signin" className="nav-connect-btn" style={{ textDecoration: 'none', display: 'inline-block' }}>Sign In</Link>
+              <Link to="/signin" className="nav-connect-btn" style={{ textDecoration: 'none' }}>Sign In</Link>
             )}
           </div>
         </nav>
 
         <main className="hero-section">
-          <h1 className="hero-title">
-            Run Events at Scale —<br />Without Running Servers.
-          </h1>
-          <div className="hero-actions">
-            <button className="btn btn-primary">Get Started</button>
-            <button className="btn btn-secondary">Learn More</button>
-          </div>
+          <motion.p 
+            className="hero-label-top"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            THE FUTURE OF EVENTS
+          </motion.p>
+
+          <motion.h1 
+            className="hero-title"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, ease: [0.19, 1, 0.22, 1], delay: 0.4 }}
+          >
+            EVENTIX
+          </motion.h1>
+
+          <motion.p 
+            className="hero-label-bottom"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            SCALE. INFINITE.
+          </motion.p>
+
+          <motion.div 
+            className="hero-actions"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+          >
+            <MagneticButton className="btn btn-primary">START EVENT</MagneticButton>
+            <MagneticButton className="btn btn-secondary">EXPLORE</MagneticButton>
+          </motion.div>
         </main>
+
+        <div className="scroll-indicator">
+          <span className="scroll-text">Scroll</span>
+          <div className="scroll-line"></div>
+        </div>
       </div>
     </div>
   );

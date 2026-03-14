@@ -1,7 +1,8 @@
 .sidebar-container {
   width: 250px;
   height: 100vh;
-  background: rgba(11, 5, 20, 0.6);
+  /* Dark Blue with lower opacity for glassmorphism */
+  background: rgba(40, 28, 89, 0.6);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid rgba(255, 255, 255, 0.05);
@@ -24,7 +25,8 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #ffffff 0%, #FF9FFC 100%);
+  /* Light Yellow to Green */
+  background: linear-gradient(135deg, #EDF7BD 0%, #85C79A 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -65,11 +67,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(82, 39, 255, 0.2);
-  border: 1px solid rgba(82, 39, 255, 0.4);
+  /* Teal (#4E8D9C) background/borders */
+  background: rgba(78, 141, 156, 0.2);
+  border: 1px solid rgba(78, 141, 156, 0.4);
   border-radius: 12px;
   z-index: -1;
-  box-shadow: 0 0 15px rgba(82, 39, 255, 0.15);
+  box-shadow: 0 0 15px rgba(78, 141, 156, 0.15);
 }
 
 .sidebar-icon {

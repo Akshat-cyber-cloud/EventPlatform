@@ -1,20 +1,111 @@
+import { useEffect, useState } from "react";
+import { db } from "../../firebase";
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { motion } from "framer-motion";
 import "../Dashboard.css";
 
+const tagColors = {
+  Register: "#00f2ff", // Electric Cyan
+  Alert: "#ff4d4d",    // Tactical Red
+  Payment: "#7000ff",  // Vivid Amethyst
+  Broadcast: "#ffaa00", // Signal Amber
+};
+
 export default function AnnouncementsView() {
+  const [announcements, setAnnouncements] = useState([]);
+
+  useEffect(() => {
+    const q = query(
+      collection(db, "announcements"),
+      orderBy("createdAt", "desc")
+    );
+
+    // onSnapshot = real-time listener, updates instantly
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setAnnouncements(
+        snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      );
+    });
+
+    return () => unsubscribe(); // cleanup on unmount
+  }, []);
+
+  const formatTime = (timestamp) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate();
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
   return (
     <motion.div 
       className="view-content"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      style={{
+        background: "rgba(0,0,0,0.2)",
+        minHeight: "75vh",
+        padding: "2rem",
+        borderRadius: "20px",
+        fontFamily: "'Inter', sans-serif"
+      }}
     >
-      <h3 className="section-title">Announcements</h3>
-      <div className="empty-state-card">
-        <div className="empty-icon">📢</div>
-        <h4>No Recent Announcements</h4>
-        <p>Stay tuned for real-time updates from event organizers.</p>
-      </div>
+      <h2 style={{ color: "#fff", marginBottom: "2rem" }}>Live Announcements</h2>
+
+      {announcements.length === 0 ? (
+        <div className="empty-state-card" style={{ marginTop: '2rem' }}>
+          <div className="empty-icon">📢</div>
+          <h4>No Recent Announcements</h4>
+          <p>Stay tuned for real-time updates from event organizers.</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {announcements.map(a => (
+            <motion.div 
+              key={a.id} 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1.5rem",
+                padding: "1rem 1.5rem",
+                borderBottom: "1px solid rgba(255,255,255,0.05)",
+                background: "rgba(255,255,255,0.02)",
+                borderRadius: "12px",
+                color: "rgba(255,255,255,0.85)",
+              }}
+            >
+              <div style={{ 
+                minWidth: "80px", 
+                color: "rgba(255,255,255,0.4)", 
+                fontSize: "0.85rem" 
+              }}>
+                {formatTime(a.createdAt)}
+              </div>
+              
+              <div style={{
+                background: `${tagColors[a.type] || tagColors.Broadcast}20`,
+                color: tagColors[a.type] || tagColors.Broadcast,
+                padding: "4px 12px",
+                borderRadius: "20px",
+                fontSize: "0.75rem",
+                fontWeight: "bold",
+                textTransform: "uppercase",
+                letterSpacing: "1px",
+                minWidth: "100px",
+                textAlign: "center"
+              }}>
+                {a.type}
+              </div>
+
+              <div style={{ flex: 1, fontSize: "0.95rem" }}>
+                {a.message}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 }

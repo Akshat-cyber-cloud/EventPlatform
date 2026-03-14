@@ -11,9 +11,9 @@ export default function Dashboard() {
       <Sidebar />
       <div className="dashboard-main">
         <div className="dashboard-header-bar">
-           <h2 className="dashboard-welcome">
-             Welcome back, <span className="highlight">{currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Attendee'}</span> 👋
-           </h2>
+          <h2 className="dashboard-welcome">
+            Welcome back, <span className="highlight">{currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Attendee'}</span>
+          </h2>
         </div>
         <div className="dashboard-content-area">
           <Outlet />

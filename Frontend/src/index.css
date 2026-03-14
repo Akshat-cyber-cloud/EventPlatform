@@ -13,13 +13,39 @@
   box-sizing: border-box;
 }
 
-body, html {
+/* LOCOMOTIVE SCROLL CORE */
+html.has-scroll-smooth {
+  overflow: hidden;
+  width: 100%;
+}
+
+html.has-scroll-smooth body {
+  overflow: hidden;
+  width: 100%;
+}
+
+[data-scroll-container] {
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden !important;
+}
+
+.home-container {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
+}
+
+body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-primary);
-  overflow-x: hidden;
-  min-height: 100vh;
+  margin: 0;
   width: 100%;
+  overflow-x: hidden !important;
 }
 
 a {

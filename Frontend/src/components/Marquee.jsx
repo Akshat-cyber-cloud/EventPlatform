@@ -11,10 +11,14 @@ const MarqueeItem = ({ text }) => (
 
 const MarqueeText = () => {
     const items = [
-        "INTERACTIVE EXPERIENCES",
-        "DESIGN SYSTEM",
-        "UI/UX",
-        "WEB & APP DESIGN"
+    "TECH EVENTS",
+    "HACKATHONS", 
+    "WORKSHOPS",
+    "LPU",
+    "REGISTER NOW",
+    "GET YOUR TICKET",
+    "LIVE ANNOUNCEMENTS",
+    "CODE A HAUNT 3.0"
     ];
 
     return (
