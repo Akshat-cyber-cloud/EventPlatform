@@ -3,11 +3,12 @@ import { db } from "../firebase";
 import { collection, addDoc, deleteDoc, doc, serverTimestamp, orderBy, query, onSnapshot } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import ThemeToggle from "../components/ThemeToggle";
 import "./Dashboard.css";
 
 export default function AdminDashboard() {
   const [events, setEvents] = useState([]);
+  
+  // Event Form State
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [date, setDate] = useState("");
@@ -36,8 +37,12 @@ export default function AdminDashboard() {
     return () => unsubscribe();
   }, []);
 
-  const handleCreate = async () => {
-    if (!title || !content || !date || !location) return;
+  const handleCreate = async (e) => {
+    if (e) e.preventDefault();
+    if (!title.trim() || !content.trim() || !date || !location.trim()) {
+      alert("Please fill out Event Title, Date, Location, and Content description.");
+      return;
+    }
     setLoading(true);
 
     let imageUrl = "";
@@ -57,7 +62,7 @@ export default function AdminDashboard() {
         }
       } catch (err) {
         console.error("Image upload failed:", err);
-        alert("Image upload failed, creating event without image.");
+        alert("Image upload failed, creating event with default poster.");
       }
       setUploadingImage(false);
     }
@@ -73,9 +78,11 @@ export default function AdminDashboard() {
         maxSeats: maxSeats === "" ? null : Number(maxSeats),
         availableSeats: maxSeats === "" ? null : Number(maxSeats),
         category,
-        image: imageUrl,
+        image: imageUrl || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80',
         createdAt: serverTimestamp(),
       });
+
+      alert("Event published successfully!");
       setTitle("");
       setContent("");
       setDate("");
@@ -87,6 +94,7 @@ export default function AdminDashboard() {
       setImageFile(null);
     } catch (error) {
       console.error("Error adding event:", error);
+      alert("Failed to publish event.");
     }
     setLoading(false);
   };
@@ -97,11 +105,13 @@ export default function AdminDashboard() {
       await deleteDoc(doc(db, "events", id));
     } catch (error) {
       console.error("Error deleting event:", error);
+      alert("Failed to delete event.");
     }
   };
 
-  const postAnnouncement = async () => {
-    if (!msg) return;
+  const postAnnouncement = async (e) => {
+    if (e) e.preventDefault();
+    if (!msg.trim()) return;
     setLoadingAnnouncement(true);
     try {
       await addDoc(collection(db, "announcements"), {
@@ -111,7 +121,7 @@ export default function AdminDashboard() {
       });
       setMsg("");
       setType("Broadcast");
-      alert("Announcement posted successfully!");
+      alert("Announcement broadcasted successfully!");
     } catch (error) {
       console.error("Error posting announcement:", error);
       alert("Failed to post announcement.");
@@ -130,158 +140,342 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="dashboard-layout" style={{ position: 'relative', display: 'block', padding: '0' }}>
+    <div className="dashboard-layout" style={{ position: 'relative', display: 'block', padding: '0', background: '#f4f5f8' }}>
       <motion.div 
         className="dashboard-main"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 1 }}
+        transition={{ duration: 0.4 }}
       >
-        <div className="dashboard-header-bar">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <h2 className="dashboard-welcome">Admin <span className="highlight">Command Center</span></h2>
-            <div className="dashboard-actions" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-              <ThemeToggle />
-              <Link to="/dashboard" className="btn btn-secondary shadow-sm">User Panel</Link>
-              <Link to="/" className="btn btn-secondary shadow-sm">Home</Link>
+        {/* Admin Header Bar */}
+        <div className="dashboard-header-bar" style={{ background: '#ffffff', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: '1400px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <h2 className="dashboard-welcome" style={{ fontSize: '1.7rem', color: '#111111' }}>
+                Admin <span className="highlight">Control Center</span>
+              </h2>
+              <span className="admin-status-badge" style={{ fontSize: '0.72rem', fontWeight: 800, background: '#fff8e6', color: '#b37400', border: '1px solid #ffe099', padding: '0.25rem 0.7rem', borderRadius: '15px', letterSpacing: '0.8px' }}>
+                👑 VERIFIED ADMIN
+              </span>
+            </div>
+
+            <div className="dashboard-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <Link to="/dashboard" style={{ textDecoration: 'none', background: '#f3f4f6', color: '#333333', padding: '0.6rem 1.2rem', borderRadius: '8px', fontWeight: 600, fontSize: '0.9rem' }}>
+                User Dashboard
+              </Link>
+              <Link to="/" style={{ textDecoration: 'none', background: '#E87A3E', color: '#ffffff', padding: '0.6rem 1.2rem', borderRadius: '8px', fontWeight: 700, fontSize: '0.9rem' }}>
+                Home Site
+              </Link>
             </div>
           </div>
         </div>
 
-        <div className="dashboard-content-area">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', maxWidth: '1400px', margin: '0 auto', alignItems: 'start' }}>
-            {/* Left Side: Create Form */}
+        {/* Content Area */}
+        <div className="dashboard-content-area" style={{ padding: '2.5rem 3.5rem', maxWidth: '1400px', margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '2.5rem', alignItems: 'start' }}>
+            
+            {/* 1. Create Event Card */}
             <motion.div 
               className="admin-create-form"
-              initial={{ x: -50, opacity: 0 }}
+              initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.1 }}
+              style={{ background: '#ffffff', border: '1px solid #e5e7eb', borderTop: '4px solid #96583A', borderRadius: '16px', padding: '2rem', boxShadow: '0 8px 30px rgba(0,0,0,0.04)' }}
             >
-              <h3>Forge New Event</h3>
-              <div className="form-group">
-                <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Event Title" className="admin-input" />
-              </div>
-              <div className="form-group-row">
-                <input type="date" value={date} onChange={e => setDate(e.target.value)} className="admin-input" />
-                <input value={location} onChange={e => setLocation(e.target.value)} placeholder="Location" className="admin-input" />
-                <select value={category} onChange={e => setCategory(e.target.value)} className="admin-input">
-                  <option value="Hackathon">Hackathon</option>
-                  <option value="Tech">Tech</option>
-                  <option value="Fest">Fest</option>
-                  <option value="ESports">ESports</option>
-                  <option value="Cultural">Cultural</option>
-                </select>
-              </div>
-              <div className="form-group-row">
-                <div style={{ flex: 1 }}>
-                  <label style={{ color: 'var(--text-secondary)', opacity: 0.6, fontSize: '0.75rem', marginBottom: '0.4rem', display: 'block' }}>Entry Fee (INR)</label>
-                  <input type="number" value={price} onChange={e => setPrice(e.target.value)} className="admin-input" min="0" />
+              <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.3rem', fontWeight: 800, color: '#96583A' }}>
+                ➕ Create & Publish Event
+              </h3>
+
+              <form onSubmit={handleCreate}>
+                <div style={{ marginBottom: '1.2rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#333333', marginBottom: '0.4rem' }}>Event Title *</label>
+                  <input 
+                    type="text" 
+                    value={title} 
+                    onChange={e => setTitle(e.target.value)} 
+                    placeholder="e.g. William Smith Comedy Show" 
+                    className="admin-input" 
+                    style={{ background: '#f8f9fa', border: '1px solid #d1d5db', color: '#111111', fontWeight: 600 }}
+                  />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ color: 'var(--text-secondary)', opacity: 0.6, fontSize: '0.75rem', marginBottom: '0.4rem', display: 'block' }}>Team Size</label>
-                  <input type="number" value={maxTeamSize} onChange={e => setMaxTeamSize(e.target.value)} className="admin-input" min="1" />
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.2rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#333333', marginBottom: '0.4rem' }}>Event Date *</label>
+                    <input 
+                      type="date" 
+                      value={date} 
+                      onChange={e => setDate(e.target.value)} 
+                      className="admin-input" 
+                      style={{ background: '#f8f9fa', border: '1px solid #d1d5db', color: '#111111' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#333333', marginBottom: '0.4rem' }}>Location *</label>
+                    <input 
+                      type="text" 
+                      value={location} 
+                      onChange={e => setLocation(e.target.value)} 
+                      placeholder="e.g. LPU Campus / Online" 
+                      className="admin-input" 
+                      style={{ background: '#f8f9fa', border: '1px solid #d1d5db', color: '#111111' }}
+                    />
+                  </div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ color: 'var(--text-secondary)', opacity: 0.6, fontSize: '0.75rem', marginBottom: '0.4rem', display: 'block' }}>Capacity</label>
-                  <input type="number" value={maxSeats} onChange={e => setMaxSeats(e.target.value)} placeholder="Unlimited" className="admin-input" min="1" />
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.2rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#333333', marginBottom: '0.4rem' }}>Category</label>
+                    <select 
+                      value={category} 
+                      onChange={e => setCategory(e.target.value)} 
+                      className="admin-input" 
+                      style={{ background: '#f8f9fa', border: '1px solid #d1d5db', color: '#111111', fontWeight: 600 }}
+                    >
+                      <option value="Hackathon">Hackathon</option>
+                      <option value="Tech">Tech</option>
+                      <option value="Fest">Fest</option>
+                      <option value="ESports">ESports</option>
+                      <option value="Cultural">Cultural</option>
+                      <option value="Comedy">Comedy</option>
+                      <option value="Concert">Concert</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#333333', marginBottom: '0.4rem' }}>Price (₹) [0 for FREE]</label>
+                    <input 
+                      type="number" 
+                      value={price} 
+                      onChange={e => setPrice(e.target.value)} 
+                      className="admin-input" 
+                      min="0" 
+                      style={{ background: '#f8f9fa', border: '1px solid #d1d5db', color: '#111111', fontWeight: 600 }}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="form-group">
-                <label style={{ color: 'var(--primary-accent)', opacity: 0.7, fontSize: '0.75rem', marginBottom: '0.5rem', display: 'block', fontWeight: 'bold' }}>EVENT BANNER</label>
-                <div className="admin-input" style={{ position: 'relative', overflow: 'hidden', padding: '0.8rem' }}>
-                  <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files[0])} style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer' }} />
-                  <span style={{ opacity: 0.6 }}>{imageFile ? `Selected: ${imageFile.name}` : 'Click to upload banner...'}</span>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.2rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#333333', marginBottom: '0.4rem' }}>Max Team Size</label>
+                    <input 
+                      type="number" 
+                      value={maxTeamSize} 
+                      onChange={e => setMaxTeamSize(e.target.value)} 
+                      className="admin-input" 
+                      min="1" 
+                      style={{ background: '#f8f9fa', border: '1px solid #d1d5db', color: '#111111' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#333333', marginBottom: '0.4rem' }}>Total Seat Capacity</label>
+                    <input 
+                      type="number" 
+                      value={maxSeats} 
+                      onChange={e => setMaxSeats(e.target.value)} 
+                      placeholder="e.g. 100" 
+                      className="admin-input" 
+                      min="1" 
+                      style={{ background: '#f8f9fa', border: '1px solid #d1d5db', color: '#111111' }}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="form-group">
-                <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="What's this event about?" className="admin-textarea" rows="4"></textarea>
-              </div>
-              <button onClick={handleCreate} disabled={loading || uploadingImage} className="btn btn-primary btn-full neon-border-pulse">
-                {loading ? (uploadingImage ? 'Uploading Data...' : 'Encoding...') : 'Initialize Protocol'}
-              </button>
+
+                <div style={{ marginBottom: '1.2rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#96583A', marginBottom: '0.4rem' }}>Event Banner Image</label>
+                  <div style={{ background: '#f8f9fa', border: '1px dashed #cbd5e1', borderRadius: '8px', padding: '0.9rem', position: 'relative' }}>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={e => setImageFile(e.target.files[0])} 
+                      style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer', width: '100%', height: '100%' }} 
+                    />
+                    <span style={{ fontSize: '0.88rem', color: '#555555', fontWeight: 600 }}>
+                      📷 {imageFile ? `Selected: ${imageFile.name}` : 'Click or drop image banner to upload...'}
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#333333', marginBottom: '0.4rem' }}>Event Description *</label>
+                  <textarea 
+                    value={content} 
+                    onChange={e => setContent(e.target.value)} 
+                    placeholder="Provide full event details, agenda, rules, and highlights..." 
+                    className="admin-textarea" 
+                    rows={4}
+                    style={{ background: '#f8f9fa', border: '1px solid #d1d5db', color: '#111111', width: '100%' }}
+                  />
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={loading || uploadingImage} 
+                  style={{
+                    width: '100%',
+                    background: '#96583A',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '0.9rem',
+                    borderRadius: '8px',
+                    fontSize: '0.95rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'background 0.2s ease'
+                  }}
+                >
+                  {loading ? (uploadingImage ? 'Uploading Image...' : 'Publishing Event...') : 'Publish Event to Platform'}
+                </button>
+              </form>
             </motion.div>
 
-            {/* Right Side: Announcements */}
+            {/* 2. Broadcast Announcement Card */}
             <motion.div 
               className="admin-create-form"
-              initial={{ x: 50, opacity: 0 }}
+              initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              style={{ borderTop: '4px solid #00f2ff' }}
+              transition={{ delay: 0.2 }}
+              style={{ background: '#ffffff', border: '1px solid #e5e7eb', borderTop: '4px solid #E87A3E', borderRadius: '16px', padding: '2rem', boxShadow: '0 8px 30px rgba(0,0,0,0.04)' }}
             >
-              <h3>Neural Broadcast</h3>
-              <div className="form-group">
-                <input 
-                  value={msg} 
-                  onChange={e => setMsg(e.target.value)} 
-                  placeholder="Status update to all units..." 
-                  className="admin-input" 
-                />
-              </div>
-              <div className="form-group">
-                <label style={{ color: 'var(--text-secondary)', opacity: 0.6, fontSize: '0.75rem', marginBottom: '0.4rem', display: 'block' }}>Signal Priority</label>
-                <select value={type} onChange={e => setType(e.target.value)} className="admin-input">
-                  <option value="Register">Alpha (Registration)</option>
-                  <option value="Alert">Omega (Urgent)</option>
-                  <option value="Payment">Sigma (Finances)</option>
-                  <option value="Broadcast">Delta (Global)</option>
-                </select>
-              </div>
-              <button onClick={postAnnouncement} disabled={loadingAnnouncement || !msg} className="btn btn-secondary btn-full" style={{ marginTop: '1rem' }}>
-                {loadingAnnouncement ? 'Transmitting...' : 'Transmit Signal'}
-              </button>
+              <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.3rem', fontWeight: 800, color: '#E87A3E' }}>
+                📢 Post Announcement
+              </h3>
+
+              <form onSubmit={postAnnouncement}>
+                <div style={{ marginBottom: '1.2rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#333333', marginBottom: '0.4rem' }}>Message Text *</label>
+                  <textarea 
+                    value={msg} 
+                    onChange={e => setMsg(e.target.value)} 
+                    placeholder="Write a live status update or announcement..." 
+                    className="admin-textarea" 
+                    rows={4}
+                    style={{ background: '#f8f9fa', border: '1px solid #d1d5db', color: '#111111', width: '100%' }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#333333', marginBottom: '0.4rem' }}>Priority Tag</label>
+                  <select 
+                    value={type} 
+                    onChange={e => setType(e.target.value)} 
+                    className="admin-input"
+                    style={{ background: '#f8f9fa', border: '1px solid #d1d5db', color: '#111111', fontWeight: 600 }}
+                  >
+                    <option value="Broadcast">Delta (Global Broadcast)</option>
+                    <option value="Alert">Omega (Urgent Alert)</option>
+                    <option value="Register">Alpha (Registration Open)</option>
+                    <option value="Payment">Sigma (Finances)</option>
+                  </select>
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={loadingAnnouncement || !msg.trim()} 
+                  style={{
+                    width: '100%',
+                    background: '#E87A3E',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '0.9rem',
+                    borderRadius: '8px',
+                    fontSize: '0.95rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'background 0.2s ease'
+                  }}
+                >
+                  {loadingAnnouncement ? 'Posting...' : 'Broadcast Announcement'}
+                </button>
+              </form>
             </motion.div>
           </div>
 
-          {/* Bottom Side: Events Management */}
-          <div style={{ marginTop: '6rem' }}>
-            <h3 className="section-title">Network Registry</h3>
+          {/* 3. Manage Platform Events List */}
+          <div style={{ marginTop: '5rem' }}>
+            <h3 className="section-title">📋 Manage Live Platform Events ({events.length})</h3>
+
             <motion.div 
-              className="events-grid"
+              className="ticket-stubs-list-admin"
               variants={containerVariants}
               initial="hidden"
               animate="show"
+              style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
             >
               <AnimatePresence mode="popLayout">
-                {events.map(event => (
-                  <motion.div 
-                    key={event.id} 
-                    variants={itemVariants} 
-                    layout 
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                    className="event-card"
-                  >
-                    {event.image && (
-                      <img src={event.image} alt={event.title} className="event-card-banner" />
-                    )}
-                    <div className="event-card-header">
-                      <h3 className="event-title">{event.title}</h3>
-                      <button onClick={() => handleDelete(event.id)} className="btn-delete" title="Terminate Entry" style={{ padding: '8px', borderRadius: '4px', border: 'none' }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                      </button>
-                    </div>
-                    <div className="event-meta">
-                        <span className="event-date">Entry Date: {event.date || 'TBD'}</span>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span className="event-badge">{event.category || 'General'}</span>
-                          <span className="price-tag">{event.price > 0 ? `₹${event.price}` : 'CORE'}</span>
+                {events.map(event => {
+                  const dateParts = (event.date || '2026-06-27').split('-');
+                  const yearStr = dateParts[0] || '2026';
+                  const monthNum = parseInt(dateParts[1] || '06', 10);
+                  const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                  const monthStr = monthNames[monthNum - 1] || 'JUN';
+                  const dayStr = dateParts[2] || '27';
+
+                  return (
+                    <motion.div 
+                      key={event.id} 
+                      variants={itemVariants} 
+                      layout 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+                      className="ticket-stub-card premium-ticket-stub"
+                      style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}
+                    >
+                      {/* Left Date Column */}
+                      <div className="stub-date-col">
+                        <div className="stub-date-box">
+                          <span className="stub-month">{monthStr}</span>
+                          <span className="stub-day">{dayStr}</span>
+                          <span className="stub-year">{yearStr}</span>
                         </div>
-                        {event.maxSeats && (
-                          <div className="progress-bar-container">
-                            <div className="progress-bar-fill" style={{ width: `${(event.availableSeats / event.maxSeats) * 100}%` }}></div>
-                          </div>
-                        )}
-                        {event.maxSeats && (
-                          <span style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                            {event.availableSeats} Units remaining in cluster
-                          </span>
-                        )}
-                        <p className="event-content">{event.content}</p>
-                    </div>
-                  </motion.div>
-                ))}
+                        <div className="stub-time-badge">
+                          {event.time || '7:00 PM'}
+                        </div>
+                      </div>
+
+                      {/* Middle Event Details */}
+                      <div className="stub-info-col">
+                        <div className="stub-header-tags">
+                          <span className="stub-category-tag">{event.category || "EVENT"}</span>
+                          <span className="vip-foil-badge">✦ LIVE PLATFORM EVENT</span>
+                        </div>
+
+                        <h3 className="stub-event-title">{event.title}</h3>
+                        <p className="stub-event-subtitle">📍 {event.location || 'LPU'} — {event.content?.slice(0, 100)}...</p>
+
+                        <div className="stub-actions-group">
+                          <button 
+                            onClick={() => handleDelete(event.id)} 
+                            style={{
+                              background: '#ef4444',
+                              color: '#ffffff',
+                              border: 'none',
+                              padding: '0.55rem 1.2rem',
+                              borderRadius: '6px',
+                              fontWeight: 700,
+                              fontSize: '0.85rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.4rem'
+                            }}
+                          >
+                            🗑️ Delete Event
+                          </button>
+                          <span className="stub-price-badge">{event.price > 0 ? `₹${event.price}` : 'FREE'}</span>
+                        </div>
+                      </div>
+
+                      {/* Right Image Thumbnail */}
+                      <div className="stub-image-col">
+                        <div className="stub-image-container">
+                          <img src={event.image || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80'} alt={event.title} className="stub-img" />
+                          <div className="ticket-notch notch-right"></div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
             </motion.div>
           </div>

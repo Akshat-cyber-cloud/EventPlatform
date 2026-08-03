@@ -1,65 +1,68 @@
+/* Sidebar Navigation — Light Clean Theme */
 .sidebar-container {
   width: 250px;
   height: 100vh;
-  background: var(--card-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-right: 1px solid var(--glass-border);
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
   position: sticky;
   top: 0;
   left: 0;
   z-index: 50;
-  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
-  transition: background 0.8s ease, border-color 0.8s ease;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.03);
 }
 
 .sidebar-logo {
-  padding: 2.5rem 2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  margin-bottom: 1rem;
+  padding: 2rem 1.8rem;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 1.5rem;
 }
 
 .sidebar-logo h2 {
   margin: 0;
   font-size: 1.5rem;
-  font-weight: 700;
-  /* Light Yellow to Green */
-  background: linear-gradient(135deg, #EDF7BD 0%, #85C79A 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
+  font-weight: 800;
+  color: #111111;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: -0.5px;
+}
+
+.logo-icon-accent {
+  color: #E87A3E;
 }
 
 .sidebar-nav {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
   padding: 0 1rem;
 }
 
 .sidebar-link {
   display: flex;
   align-items: center;
-  padding: 1rem 1.25rem;
-  color: var(--text-secondary);
+  padding: 0.9rem 1.2rem;
+  color: #555555;
   text-decoration: none;
   font-weight: 500;
-  border-radius: 12px;
-  transition: all 0.3s ease;
+  border-radius: 10px;
+  transition: all 0.2s ease;
   position: relative;
+  font-size: 0.95rem;
 }
 
 .sidebar-link:hover {
-  color: var(--text-primary);
-  background: var(--input-bg);
+  color: #111111;
+  background: #f4f5f7;
 }
 
 .sidebar-link.active {
-  color: var(--text-primary);
+  color: #96583A;
+  font-weight: 700;
 }
 
 .active-indicator {
@@ -68,43 +71,41 @@
   left: 0;
   right: 0;
   bottom: 0;
-  /* Teal (#4E8D9C) background/borders */
-  background: rgba(78, 141, 156, 0.2);
-  border: 1px solid rgba(78, 141, 156, 0.4);
-  border-radius: 12px;
+  background: rgba(232, 122, 62, 0.12);
+  border: 1px solid rgba(232, 122, 62, 0.3);
+  border-radius: 10px;
   z-index: -1;
-  box-shadow: 0 0 15px rgba(78, 141, 156, 0.15);
 }
 
 .sidebar-icon {
-  margin-right: 1rem;
-  font-size: 1.25rem;
+  margin-right: 0.9rem;
+  font-size: 1.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .sidebar-footer {
-  padding: 2rem 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 1.5rem 1rem;
+  border-top: 1px solid #f0f0f0;
 }
 
 .sidebar-logout-btn {
   width: 100%;
   display: flex;
   align-items: center;
-  padding: 1rem 1.25rem;
-  color: rgba(255, 85, 85, 0.7);
+  padding: 0.85rem 1.2rem;
+  color: #dc2626;
   background: transparent;
   border: none;
-  font-weight: 500;
-  font-size: 1rem;
-  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .sidebar-logout-btn:hover {
-  background: rgba(255, 85, 85, 0.1);
-  color: #ff5555;
+  background: #fef2f2;
+  color: #b91c1c;
 }

@@ -1,11 +1,19 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { ADMIN_UID, ADMIN_EMAIL } from "./AdminRoute";
 import { motion } from "framer-motion";
 import "./Sidebar.css";
 
 export default function Sidebar() {
-  const { logout } = useAuth();
+  const { currentUser, logout } = useAuth();
   const location = useLocation();
+
+  const isAdmin = currentUser && (
+    currentUser.uid === ADMIN_UID || 
+    currentUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
+    currentUser.email?.toLowerCase().includes("aakshat10g") ||
+    currentUser.displayName?.toLowerCase().includes("aakshat10g")
+  );
 
   const links = [
     { 
@@ -31,15 +39,25 @@ export default function Sidebar() {
     }
   ];
 
+  if (isAdmin) {
+    links.push({
+      name: "👑 Admin Portal",
+      path: "/admin",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      )
+    });
+  }
+
   return (
     <div className="sidebar-container">
       <div className="sidebar-logo">
-        <h2>EVENTIX</h2>
+        <h2><span className="logo-icon-accent">❖</span> Eventix</h2>
+        {isAdmin && <span className="admin-status-badge" style={{ fontSize: '0.68rem', fontWeight: 800, background: '#fff8e6', color: '#b37400', border: '1px solid #ffe099', padding: '0.15rem 0.5rem', borderRadius: '12px', marginTop: '0.4rem', display: 'inline-block', letterSpacing: '0.8px' }}>👑 ADMIN ACTIVE</span>}
       </div>
 
       <nav className="sidebar-nav">
         {links.map((link) => {
-          // Exact match for dashboard, startswith for subroutes if we had deeper nesting
           const isActive = location.pathname === link.path;
           return (
             <Link

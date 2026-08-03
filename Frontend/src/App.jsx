@@ -1,11 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
-import Section1 from './pages/Section1';
-import Section2 from './pages/Section2';
 import Section3 from './pages/Section3';
-import Marquee from './components/Marquee';
-import SmoothScroll from './components/SmoothScroll';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import EventsView from './pages/DashboardViews/EventsView';
@@ -16,19 +12,13 @@ import AdminRoute from './components/AdminRoute';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
-import ThemeToggle from './components/ThemeToggle';
 
 const Landing = () => (
-  <div data-theme="dark">
-    <SmoothScroll>
-      <main>
-        <Home />
-        <Marquee />
-        <Section1 />
-        <Section2 />
-        <Section3 />
-      </main>
-    </SmoothScroll>
+  <div>
+    <main>
+      <Home />
+      <Section3 />
+    </main>
   </div>
 );
 
