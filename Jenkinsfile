@@ -27,11 +27,11 @@ pipeline {
             steps {
                 echo "=== Stage 2: Installing dependencies and building static assets ==="
                 dir('Backend') {
-                    sh 'npm install'
+                    bat 'npm install'
                 }
                 dir('Frontend') {
-                    sh 'npm install'
-                    sh 'npm run build'
+                    bat 'npm install'
+                    bat 'npm run build'
                 }
             }
         }
@@ -40,7 +40,7 @@ pipeline {
             steps {
                 echo "=== Stage 3: Running unit tests and code lint checks ==="
                 dir('Backend') {
-                    sh 'npm test || echo "Backend test suite completed with warnings"'
+                    bat 'npm test || echo Backend test suite completed with warnings'
                 }
             }
         }
@@ -48,8 +48,8 @@ pipeline {
         stage('4. Build Docker Images') {
             steps {
                 echo "=== Stage 4: Building containerized Docker images for version v${BUILD_NUMBER} ==="
-                sh "docker build -t ${BACKEND_IMAGE}:${BUILD_NUMBER} -t ${BACKEND_IMAGE}:latest ./Backend"
-                sh "docker build -t ${FRONTEND_IMAGE}:${BUILD_NUMBER} -t ${FRONTEND_IMAGE}:latest ./Frontend"
+                bat "docker build -t ${BACKEND_IMAGE}:${BUILD_NUMBER} -t ${BACKEND_IMAGE}:latest ./Backend"
+                bat "docker build -t ${FRONTEND_IMAGE}:${BUILD_NUMBER} -t ${FRONTEND_IMAGE}:latest ./Frontend"
             }
         }
 
@@ -57,11 +57,11 @@ pipeline {
             steps {
                 echo "=== Stage 5: Authenticating and pushing images to Docker Hub (${DOCKER_HUB_USER}) ==="
                 withCredentials([usernamePassword(credentialsId: "${CREDENTIALS_ID}", passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                    sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin'
-                    sh "docker push ${BACKEND_IMAGE}:${BUILD_NUMBER}"
-                    sh "docker push ${BACKEND_IMAGE}:latest"
-                    sh "docker push ${FRONTEND_IMAGE}:${BUILD_NUMBER}"
-                    sh "docker push ${FRONTEND_IMAGE}:latest"
+                    bat 'docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%'
+                    bat "docker push ${BACKEND_IMAGE}:${BUILD_NUMBER}"
+                    bat "docker push ${BACKEND_IMAGE}:latest"
+                    bat "docker push ${FRONTEND_IMAGE}:${BUILD_NUMBER}"
+                    bat "docker push ${FRONTEND_IMAGE}:latest"
                 }
             }
         }
@@ -69,24 +69,24 @@ pipeline {
         stage('6. Deploy to Kubernetes') {
             steps {
                 echo "=== Stage 6: Applying Kubernetes manifests and deploying images ==="
-                sh 'kubectl apply -f k8s/secret.yaml'
-                sh 'kubectl apply -f k8s/backend-service.yaml'
-                sh 'kubectl apply -f k8s/frontend-service.yaml'
-                sh 'kubectl apply -f k8s/backend-deployment.yaml'
-                sh 'kubectl apply -f k8s/frontend-deployment.yaml'
-                sh 'kubectl apply -f k8s/hpa.yaml'
+                bat 'kubectl apply -f k8s/secret.yaml'
+                bat 'kubectl apply -f k8s/backend-service.yaml'
+                bat 'kubectl apply -f k8s/frontend-service.yaml'
+                bat 'kubectl apply -f k8s/backend-deployment.yaml'
+                bat 'kubectl apply -f k8s/frontend-deployment.yaml'
+                bat 'kubectl apply -f k8s/hpa.yaml'
 
                 // Dynamically update image tags in Kubernetes
-                sh "kubectl set image deployment/eventix-backend eventix-backend=${BACKEND_IMAGE}:${BUILD_NUMBER} --namespace=${KUBE_NAMESPACE}"
-                sh "kubectl set image deployment/eventix-frontend eventix-frontend=${FRONTEND_IMAGE}:${BUILD_NUMBER} --namespace=${KUBE_NAMESPACE}"
+                bat "kubectl set image deployment/eventix-backend eventix-backend=${BACKEND_IMAGE}:${BUILD_NUMBER} --namespace=${KUBE_NAMESPACE}"
+                bat "kubectl set image deployment/eventix-frontend eventix-frontend=${FRONTEND_IMAGE}:${BUILD_NUMBER} --namespace=${KUBE_NAMESPACE}"
             }
         }
 
         stage('7. Verify Deployment Health') {
             steps {
                 echo "=== Stage 7: Verifying pod rollout status and health probes ==="
-                sh "kubectl rollout status deployment/eventix-backend --namespace=${KUBE_NAMESPACE} --timeout=120s"
-                sh "kubectl rollout status deployment/eventix-frontend --namespace=${KUBE_NAMESPACE} --timeout=120s"
+                bat "kubectl rollout status deployment/eventix-backend --namespace=${KUBE_NAMESPACE} --timeout=120s"
+                bat "kubectl rollout status deployment/eventix-frontend --namespace=${KUBE_NAMESPACE} --timeout=120s"
             }
         }
     }
@@ -97,12 +97,12 @@ pipeline {
         }
         failure {
             echo "FAILURE: Deployment health check failed! Initiating AUTOMATED ROLLBACK..."
-            sh "kubectl rollout undo deployment/eventix-backend --namespace=${KUBE_NAMESPACE}"
-            sh "kubectl rollout undo deployment/eventix-frontend --namespace=${KUBE_NAMESPACE}"
+            bat "kubectl rollout undo deployment/eventix-backend --namespace=${KUBE_NAMESPACE}"
+            bat "kubectl rollout undo deployment/eventix-frontend --namespace=${KUBE_NAMESPACE}"
             echo "ROLLBACK COMPLETE: Reverted to previous stable deployment version."
         }
         always {
-            sh 'docker logout || true'
+            bat 'docker logout || ver > nul'
         }
     }
 }
