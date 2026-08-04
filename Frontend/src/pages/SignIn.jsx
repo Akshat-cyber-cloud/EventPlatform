@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import './Auth.css';
 
-import { ADMIN_UID } from '../components/AdminRoute';
+import { ADMIN_EMAIL } from '../components/AdminRoute';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -19,8 +19,9 @@ const SignIn = () => {
       setError('');
       setLoading(true);
       const userCredential = await signin(email, password);
-
-      if (userCredential.user.uid === ADMIN_UID) {
+      const user = userCredential.user;
+      
+      if (user.email && user.email.trim().toLowerCase() === ADMIN_EMAIL) {
         navigate('/admin');
       } else {
         navigate('/dashboard');

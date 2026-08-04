@@ -14,22 +14,36 @@ app.use(express.json());
 // Serve static files from the Frontend dist directory
 app.use(express.static(path.join(__dirname, '../Frontend/dist')));
 
-// ImageKit Setup
-const imagekit = new ImageKit({
-    publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-    privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-    urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
-});
+// ImageKit Setup (Safe initialization)
+const imagekit = (process.env.IMAGEKIT_PUBLIC_KEY && process.env.IMAGEKIT_PRIVATE_KEY && process.env.IMAGEKIT_URL_ENDPOINT)
+    ? new ImageKit({
+        publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+        privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+        urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
+      })
+    : null;
 
-// Razorpay Setup
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET
-});
+// Razorpay Setup (Safe initialization)
+const razorpay = (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET)
+    ? new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET
+      })
+    : null;
 
 const upload = multer({ storage: multer.memoryStorage() });
 
 // --- Endpoints ---
+
+// Health Check for Kubernetes Liveness & Readiness Probes
+app.get('/api/health', (req, res) => {
+    res.status(200).json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        service: 'eventix-backend',
+        uptime: process.uptime()
+    });
+});
 
 /**
  * Enhanced upload function based on user's snippet
@@ -45,6 +59,10 @@ async function uploadToImageKit({ buffer, filename, folder = "event_banners" }) 
 // ImageKit: Upload
 app.post('/api/upload', upload.single('image'), async (req, res) => {
     try {
+        if (!imagekit) {
+            return res.status(500).json({ error: "ImageKit credentials missing in environment variables." });
+        }
+
         if (!req.file) {
             return res.status(400).json({ error: "No image file provided." });
         }
@@ -67,6 +85,10 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
 // Razorpay: Create Order
 app.post('/api/create-order', async (req, res) => {
     try {
+        if (!razorpay) {
+            return res.status(500).json({ error: "Razorpay credentials missing in environment variables." });
+        }
+
         const { amount, currency = 'INR', receipt = 'receipt_123' } = req.body;
         console.log("Creating Razorpay Order:", { amount, currency, receipt });
 

@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ADMIN_UID, ADMIN_EMAIL } from '../components/AdminRoute';
+import { useAuth } from '../contexts/AuthContext';
+import { ADMIN_EMAIL } from '../components/AdminRoute';
 import './Home.css';
 
 const Home = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
-  const isAdmin = currentUser && (currentUser.uid === ADMIN_UID || currentUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase());
+  const isAdmin = currentUser && currentUser.email && currentUser.email.trim().toLowerCase() === ADMIN_EMAIL;
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedEventDetails, setSelectedEventDetails] = useState(null);

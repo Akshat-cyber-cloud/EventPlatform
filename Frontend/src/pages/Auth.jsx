@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { ADMIN_UID } from '../components/AdminRoute';
+import { ADMIN_EMAIL } from '../components/AdminRoute';
 import './Auth.css';
 
 const Auth = () => {
@@ -29,7 +29,8 @@ const Auth = () => {
       setError('');
       setLoading(true);
       const userCredential = await signin(email, password);
-      if (userCredential.user.uid === ADMIN_UID) {
+      const user = userCredential.user;
+      if (user.email && user.email.trim().toLowerCase() === ADMIN_EMAIL) {
         navigate('/admin');
       } else {
         navigate('/dashboard');

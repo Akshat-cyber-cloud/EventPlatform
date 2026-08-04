@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { ADMIN_UID, ADMIN_EMAIL } from "./AdminRoute";
+import { ADMIN_EMAIL } from "./AdminRoute";
 import { motion } from "framer-motion";
 import "./Sidebar.css";
 
@@ -8,12 +8,7 @@ export default function Sidebar() {
   const { currentUser, logout } = useAuth();
   const location = useLocation();
 
-  const isAdmin = currentUser && (
-    currentUser.uid === ADMIN_UID || 
-    currentUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
-    currentUser.email?.toLowerCase().includes("aakshat10g") ||
-    currentUser.displayName?.toLowerCase().includes("aakshat10g")
-  );
+  const isAdmin = currentUser && currentUser.email && currentUser.email.trim().toLowerCase() === ADMIN_EMAIL;
 
   const links = [
     { 
