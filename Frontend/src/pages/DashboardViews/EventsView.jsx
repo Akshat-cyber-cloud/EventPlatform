@@ -7,6 +7,65 @@ import { registerForEvent, getUserRegisteredEventIds } from "../../services/regi
 import emailjs from '@emailjs/browser';
 import "../Dashboard.css";
 
+const defaultEvents = [
+  {
+    id: 'fe1',
+    category: 'Comedy',
+    title: 'William Smith Comedy Show',
+    date: '2026-06-27',
+    time: '7:00 PM',
+    location: 'LPU Main Auditorium',
+    price: 499,
+    image: 'https://images.unsplash.com/photo-1585699324551-f6c309eedeca?auto=format&fit=crop&w=800&q=80',
+    content: 'Get ready for an evening of non-stop laughter with William Smith featuring fresh standup material and surprise guest openers.',
+    maxSeats: 500,
+    availableSeats: 342,
+    maxTeamSize: 1
+  },
+  {
+    id: 'fe2',
+    category: 'Concert',
+    title: 'Shannon Weigel Acoustic Night',
+    date: '2026-06-28',
+    time: '8:30 PM',
+    location: 'Open Air Theatre',
+    price: 899,
+    image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80',
+    content: 'An intimate musical experience with Shannon Weigel performing her chart-topping acoustic ballads live with a full string quartet.',
+    maxSeats: 300,
+    availableSeats: 118,
+    maxTeamSize: 1
+  },
+  {
+    id: 'fe3',
+    category: 'Hackathon',
+    title: 'Global AI & Serverless Hackathon 3.0',
+    date: '2026-06-29',
+    time: '9:00 AM',
+    location: 'LPU Innovation Hub',
+    price: 0,
+    image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=800&q=80',
+    content: '48-hour global coding challenge featuring top mentors, cloud infrastructure credits, and cash prizes for winning teams.',
+    maxSeats: 1000,
+    availableSeats: 820,
+    maxTeamSize: 4
+  },
+  {
+    id: 'fe4',
+    category: 'Robotics',
+    title: 'Autonomous Robotics & AI Expo',
+    date: '2026-06-30',
+    time: '10:00 AM',
+    location: 'Tech Exhibition Hall B',
+    price: 299,
+    image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80',
+    content: 'Discover the latest breakthroughs in humanoid robotics, drone automation, and machine learning from world-leading robotics labs.',
+    maxSeats: 400,
+    availableSeats: 250,
+    maxTeamSize: 2
+  }
+];
+
 export default function EventsView() {
   const { currentUser } = useAuth();
   const [events, setEvents] = useState([]);
@@ -50,7 +109,16 @@ export default function EventsView() {
     return () => unsubscribeEvents();
   }, [currentUser]);
 
-  const filteredEvents = events.filter(event => {
+  const legacyTitles = ["hack the box", "hack n hunt", "coding hackathon"];
+
+  const firestoreNewEvents = events.filter(e => 
+    !legacyTitles.some(legacy => (e.title || '').toLowerCase().includes(legacy)) &&
+    !defaultEvents.some(d => d.title.toLowerCase() === (e.title || '').toLowerCase())
+  );
+
+  const displayList = [...defaultEvents, ...firestoreNewEvents];
+
+  const filteredEvents = displayList.filter(event => {
     const matchesSearch = (event.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (event.content || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (event.location || '').toLowerCase().includes(searchQuery.toLowerCase());
@@ -287,9 +355,9 @@ export default function EventsView() {
             const dayStr = dateParts[2] || '27';
 
             return (
-              <motion.div 
-                key={event.id} 
-                variants={itemVariants} 
+              <motion.div
+                key={event.id}
+                variants={itemVariants}
                 className="ticket-stub-card premium-ticket-stub"
                 whileHover={{ y: -4, boxShadow: "0 16px 35px rgba(232, 122, 62, 0.12)" }}
                 transition={{ duration: 0.2 }}
@@ -326,7 +394,7 @@ export default function EventsView() {
                         ? "✓ Registered"
                         : (event.availableSeats === 0 ? "Cluster Full" : "Get Tickets")}
                     </button>
-                    <button 
+                    <button
                       className="btn-view-details"
                       onClick={() => setViewDetailsEvent(event)}
                     >
@@ -392,13 +460,13 @@ export default function EventsView() {
             >
               {/* Image Banner */}
               <div style={{ position: 'relative', width: '100%', height: '220px' }}>
-                <img 
-                  src={viewDetailsEvent.image || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80'} 
-                  alt={viewDetailsEvent.title} 
+                <img
+                  src={viewDetailsEvent.image || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80'}
+                  alt={viewDetailsEvent.title}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
                 {/* Prominent Circular Close Button */}
-                <button 
+                <button
                   onClick={() => setViewDetailsEvent(null)}
                   style={{
                     position: 'absolute',
@@ -477,7 +545,7 @@ export default function EventsView() {
 
                 {/* Modal Footer Actions */}
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                  <button 
+                  <button
                     className="btn-get-tickets"
                     style={{ padding: '0.8rem 1.8rem', fontSize: '0.95rem' }}
                     disabled={registeredEvents.has(viewDetailsEvent.id) || viewDetailsEvent.availableSeats === 0}
@@ -485,7 +553,7 @@ export default function EventsView() {
                   >
                     {registeredEvents.has(viewDetailsEvent.id) ? "✓ Registered" : "Proceed to Book Ticket"}
                   </button>
-                  <button 
+                  <button
                     onClick={() => setViewDetailsEvent(null)}
                     style={{ background: '#f3f4f6', color: '#333', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
                   >
@@ -542,17 +610,17 @@ export default function EventsView() {
                 <h3 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 800, color: '#111111' }}>
                   Register: {selectedEvent.title}
                 </h3>
-                <button 
-                  onClick={handleCloseBookingModal} 
-                  style={{ 
-                    background: '#f3f4f6', 
-                    border: 'none', 
-                    color: '#111111', 
-                    width: '34px', 
-                    height: '34px', 
-                    borderRadius: '50%', 
-                    fontSize: '1.1rem', 
-                    fontWeight: 'bold', 
+                <button
+                  onClick={handleCloseBookingModal}
+                  style={{
+                    background: '#f3f4f6',
+                    border: 'none',
+                    color: '#111111',
+                    width: '34px',
+                    height: '34px',
+                    borderRadius: '50%',
+                    fontSize: '1.1rem',
+                    fontWeight: 'bold',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',

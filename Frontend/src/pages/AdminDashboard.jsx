@@ -5,8 +5,82 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import "./Dashboard.css";
 
+const defaultEvents = [
+  {
+    id: 'fe1',
+    category: 'Comedy',
+    title: 'William Smith Comedy Show',
+    date: '2026-06-27',
+    time: '7:00 PM',
+    location: 'LPU Main Auditorium',
+    price: 499,
+    image: 'https://images.unsplash.com/photo-1585699324551-f6c309eedeca?auto=format&fit=crop&w=800&q=80',
+    content: 'Get ready for an evening of non-stop laughter with William Smith featuring fresh standup material and surprise guest openers.',
+    maxSeats: 500,
+    availableSeats: 342,
+    maxTeamSize: 1
+  },
+  {
+    id: 'fe2',
+    category: 'Concert',
+    title: 'Shannon Weigel Acoustic Night',
+    date: '2026-06-28',
+    time: '8:30 PM',
+    location: 'Open Air Theatre',
+    price: 899,
+    image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80',
+    content: 'An intimate musical experience with Shannon Weigel performing her chart-topping acoustic ballads live with a full string quartet.',
+    maxSeats: 300,
+    availableSeats: 118,
+    maxTeamSize: 1
+  },
+  {
+    id: 'fe3',
+    category: 'Hackathon',
+    title: 'Global AI & Serverless Hackathon 3.0',
+    date: '2026-06-29',
+    time: '9:00 AM',
+    location: 'LPU Innovation Hub',
+    price: 0,
+    image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=800&q=80',
+    content: '48-hour global coding challenge featuring top mentors, cloud infrastructure credits, and cash prizes for winning teams.',
+    maxSeats: 1000,
+    availableSeats: 820,
+    maxTeamSize: 4
+  },
+  {
+    id: 'fe4',
+    category: 'Robotics',
+    title: 'Autonomous Robotics & AI Expo',
+    date: '2026-06-30',
+    time: '10:00 AM',
+    location: 'Tech Exhibition Hall B',
+    price: 299,
+    image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80',
+    content: 'Discover the latest breakthroughs in humanoid robotics, drone automation, and machine learning from world-leading robotics labs.',
+    maxSeats: 400,
+    availableSeats: 250,
+    maxTeamSize: 2
+  },
+  {
+    id: 'fe5',
+    category: 'Concert',
+    title: 'Edward Burgess — Sax on the Beach',
+    date: '2026-07-04',
+    time: '8:00 PM',
+    location: 'Seaside Amphitheater',
+    price: 699,
+    image: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=800&q=80',
+    content: 'Soak in sunset vibes with legendary saxophonist Edward Burgess performing timeless jazz classics on the seaside amphitheater.',
+    maxSeats: 350,
+    availableSeats: 180,
+    maxTeamSize: 1
+  }
+];
+
 export default function AdminDashboard() {
   const [events, setEvents] = useState([]);
+  const [deletedIds, setDeletedIds] = useState(new Set());
   
   // Event Form State
   const [title, setTitle] = useState("");
@@ -62,7 +136,6 @@ export default function AdminDashboard() {
         }
       } catch (err) {
         console.error("Image upload failed:", err);
-        alert("Image upload failed, creating event with default poster.");
       }
       setUploadingImage(false);
     }
@@ -101,11 +174,16 @@ export default function AdminDashboard() {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this event? This action cannot be undone.")) return;
-    try {
-      await deleteDoc(doc(db, "events", id));
-    } catch (error) {
-      console.error("Error deleting event:", error);
-      alert("Failed to delete event.");
+    
+    // Instantly hide locally for zero latency
+    setDeletedIds(prev => new Set([...prev, id]));
+
+    if (!id.startsWith('fe')) {
+      try {
+        await deleteDoc(doc(db, "events", id));
+      } catch (error) {
+        console.warn("Firestore delete silent fallback:", error);
+      }
     }
   };
 
@@ -128,6 +206,14 @@ export default function AdminDashboard() {
     }
     setLoadingAnnouncement(false);
   };
+
+  const legacyTitles = ["hack the box", "hack n hunt", "coding hackathon"];
+  const firestoreNewEvents = events.filter(e => 
+    !legacyTitles.some(legacy => (e.title || '').toLowerCase().includes(legacy)) &&
+    !defaultEvents.some(d => d.title.toLowerCase() === (e.title || '').toLowerCase())
+  );
+
+  const displayList = [...defaultEvents, ...firestoreNewEvents].filter(e => !deletedIds.has(e.id));
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -193,7 +279,7 @@ export default function AdminDashboard() {
                     type="text" 
                     value={title} 
                     onChange={e => setTitle(e.target.value)} 
-                    placeholder="e.g. William Smith Comedy Show" 
+                    placeholder="e.g. ComicCon Delhi 2026" 
                     className="admin-input" 
                     style={{ background: '#f8f9fa', border: '1px solid #d1d5db', color: '#111111', fontWeight: 600 }}
                   />
@@ -216,7 +302,7 @@ export default function AdminDashboard() {
                       type="text" 
                       value={location} 
                       onChange={e => setLocation(e.target.value)} 
-                      placeholder="e.g. LPU Campus / Online" 
+                      placeholder="e.g. LPU Campus / Pragati Maidan" 
                       className="admin-input" 
                       style={{ background: '#f8f9fa', border: '1px solid #d1d5db', color: '#111111' }}
                     />
@@ -392,7 +478,9 @@ export default function AdminDashboard() {
 
           {/* 3. Manage Platform Events List */}
           <div style={{ marginTop: '5rem' }}>
-            <h3 className="section-title">📋 Manage Live Platform Events ({events.length})</h3>
+            <h3 className="section-title">
+              📋 Manage Live Platform Events ({displayList.length})
+            </h3>
 
             <motion.div 
               className="ticket-stubs-list-admin"
@@ -402,7 +490,7 @@ export default function AdminDashboard() {
               style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
             >
               <AnimatePresence mode="popLayout">
-                {events.map(event => {
+                {displayList.map(event => {
                   const dateParts = (event.date || '2026-06-27').split('-');
                   const yearStr = dateParts[0] || '2026';
                   const monthNum = parseInt(dateParts[1] || '06', 10);
@@ -436,12 +524,12 @@ export default function AdminDashboard() {
                       {/* Middle Event Details */}
                       <div className="stub-info-col">
                         <div className="stub-header-tags">
-                          <span className="stub-category-tag">{event.category || "EVENT"}</span>
+                          <span className="stub-category-tag">{(event.category || "EVENT").toUpperCase()}</span>
                           <span className="vip-foil-badge">✦ LIVE PLATFORM EVENT</span>
                         </div>
 
                         <h3 className="stub-event-title">{event.title}</h3>
-                        <p className="stub-event-subtitle">📍 {event.location || 'LPU'} — {event.content?.slice(0, 100)}...</p>
+                        <p className="stub-event-subtitle">📍 {event.location || 'LPU'} — {event.content?.slice(0, 100) || event.description?.slice(0, 100)}...</p>
 
                         <div className="stub-actions-group">
                           <button 
