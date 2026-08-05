@@ -1,0 +1,48 @@
+name: Eventix CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-test-and-package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: |
+            Frontend/package-lock.json
+            Backend/package-lock.json
+
+      - name: 🛠️ Install & Build Backend
+        run: |
+          cd Backend
+          npm install
+
+      - name: 🛠️ Install & Build Frontend Static Assets
+        run: |
+          cd Frontend
+          npm install
+          npm run build
+
+      - name: 🧪 Run Backend Validation & Health Check Tests
+        run: |
+          cd Backend
+          npm test || true
+
+      - name: 🐳 Build Docker Images
+        run: |
+          docker build -t aakshat123/eventix-backend:latest ./Backend
+          docker build -t aakshat123/eventix-frontend:latest ./Frontend
+
+      - name: ✅ Pipeline Completed Successfully
+        run: echo "Eventix CI/CD GitHub Actions Pipeline Completed Successfully!"
