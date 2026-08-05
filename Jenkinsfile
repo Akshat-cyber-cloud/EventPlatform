@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        GIT_SSL_NO_VERIFY = 'true'
         DOCKER_HUB_USER   = 'aakshat123'
         BACKEND_IMAGE     = "${DOCKER_HUB_USER}/eventix-backend"
         FRONTEND_IMAGE    = "${DOCKER_HUB_USER}/eventix-frontend"
@@ -19,6 +20,7 @@ pipeline {
         stage('1. Checkout Source Code') {
             steps {
                 echo "=== Stage 1: Checking out code from GitHub repository ==="
+                bat 'git config --global http.sslVerify false'
                 checkout scm
             }
         }
