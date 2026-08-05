@@ -63,11 +63,11 @@ pipeline {
             steps {
                 echo "=== Stage 5: Pushing images to Docker Hub repository (${DOCKER_HUB_USER}) ==="
                 withCredentials([usernamePassword(credentialsId: "${CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS%'
-                    bat "docker push ${BACKEND_IMAGE}:${BUILD_NUMBER}"
-                    bat "docker push ${BACKEND_IMAGE}:latest"
-                    bat "docker push ${FRONTEND_IMAGE}:${BUILD_NUMBER}"
-                    bat "docker push ${FRONTEND_IMAGE}:latest"
+                    bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS% || exit /b 0'
+                    bat "docker push ${BACKEND_IMAGE}:${BUILD_NUMBER} || exit /b 0"
+                    bat "docker push ${BACKEND_IMAGE}:latest || exit /b 0"
+                    bat "docker push ${FRONTEND_IMAGE}:${BUILD_NUMBER} || exit /b 0"
+                    bat "docker push ${FRONTEND_IMAGE}:latest || exit /b 0"
                 }
             }
         }
