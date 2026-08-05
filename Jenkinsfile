@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         GIT_SSL_NO_VERIFY = 'true'
+        KUBECONFIG        = 'C:\\ProgramData\\Jenkins\\.jenkins\\.kube\\config'
         DOCKER_HUB_USER   = 'aakshat123'
         BACKEND_IMAGE     = "${DOCKER_HUB_USER}/eventix-backend"
         FRONTEND_IMAGE    = "${DOCKER_HUB_USER}/eventix-frontend"
