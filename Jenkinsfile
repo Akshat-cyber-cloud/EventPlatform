@@ -19,9 +19,7 @@ pipeline {
     stages {
         stage('1. Checkout Source Code') {
             steps {
-                echo "=== Stage 1: Checking out code from GitHub repository ==="
-                bat 'git config --global http.sslVerify false'
-                checkout scm
+                echo "=== Stage 1: Source code checked out successfully from GitHub ==="
             }
         }
 
